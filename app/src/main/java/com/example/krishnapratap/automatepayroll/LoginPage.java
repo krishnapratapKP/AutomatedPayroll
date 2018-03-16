@@ -3,6 +3,7 @@ package com.example.krishnapratap.automatepayroll;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
@@ -48,16 +49,21 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
     private  ImageView mImageView;
     private TextView mUsername;
     private String sUsername;
+    private String mId;
+    private  String mDateTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
+
+
         mImageView=(ImageView)findViewById(R.id.uImageView);
         mUsername=(TextView)findViewById(R.id.tUsername);
 
         requestPermission();
         dispatchTakePicturInten();
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -65,6 +71,7 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
                 .build();
         SharedPreferences sp=getSharedPreferences("User_info",MODE_PRIVATE);
         sUsername =sp.getString("username","N/A");
+        mId =sp.getString("Id","N/A");
         mUsername.setText(sUsername);
         mLatitude=(TextView)findViewById(R.id.latitude);
         mLongitude=(TextView)findViewById(R.id.longitude);
@@ -74,6 +81,7 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+
     }
 
     @Override
@@ -84,6 +92,7 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
 
     @Override
     public void onConnected( Bundle bundle) {
+
         mLocationRequest=LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(mInterval);
@@ -92,6 +101,18 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,mLocationRequest,this);
+
+    }
+
+    private void fileSize() {
+        File file=new File(mCurrentPhotoPath);
+        if(file.length()==0)
+        {
+
+            Intent intent=new Intent(LoginPage.this,MainActivity.class);
+            startActivity(intent);
+
+        }
     }
 
     @Override
@@ -106,10 +127,14 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
 
     @Override
     public void onLocationChanged(Location location) {
+
         msLatitude=String.valueOf(location.getLatitude());
         msLongitude=String.valueOf(location.getLongitude());
         mLatitude.setText(msLatitude);
         mLongitude.setText(msLongitude);
+        String mLocation="location";
+        Background background = new Background();
+        background.execute(mLocation,mId,msLongitude,msLatitude);
     }
 
     private  void requestPermission(){
@@ -139,18 +164,27 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
 
     private File createImageFile() throws IOException {
         String timestamp =new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        mDateTime=timestamp;
         String imageFileName = "JPEG_"+timestamp+"_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(imageFileName,".jpg",storageDir);
 
         mCurrentPhotoPath=image.getAbsolutePath();
+
         return  image;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+        fileSize();
+        String timestamp=mDateTime;
+        Background background=new Background();
+        background.execute("Image",mId,mCurrentPhotoPath,timestamp,msLatitude,msLongitude);
         mImageView.setImageDrawable(Drawable.createFromPath(mCurrentPhotoPath));
+    }
+
+    private String getDateTime()  {
+        return new SimpleDateFormat("dd-MM-YYYY/HH:mm:ss").format(new Date());
     }
 
     @Override
