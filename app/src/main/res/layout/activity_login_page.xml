@@ -8,16 +8,16 @@
     tools:context="com.example.krishnapratap.automatepayroll.LoginPage">
 
     <TextView
+        android:id="@+id/tUsername"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/username"
-        android:textAlignment="center"
-        android:id="@+id/tUsername"/>
+        android:textAlignment="center" />
 
     <ImageView
+        android:id="@+id/uImageView"
         android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:id="@+id/uImageView"/>
+        android:layout_height="300dp" />
 
     <TableLayout
         android:layout_width="match_parent"
@@ -26,38 +26,45 @@
 
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            >
+            android:layout_height="fill_parent">
 
             <TextView
-                android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:text="@string/longitude"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                />
+                android:text="@string/longitude" />
+
             <TextView
+                android:id="@+id/longitude"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Value"
-                android:id="@+id/longitude"/>
+                android:text="Value" />
         </TableRow>
+
         <TableRow
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
             <TextView
-                android:layout_height="wrap_content"
                 android:layout_width="0dp"
-                android:text="@string/latitude"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                />
+                android:text="@string/latitude" />
+
             <TextView
+                android:id="@+id/latitude"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Value"
-                android:id="@+id/latitude"/>
+                android:text="Value" />
+        </TableRow>
+
+        <TableRow>
+
+            <Button
+                android:onClick="logout"
+                android:text="logout" />
         </TableRow>
     </TableLayout>
 
