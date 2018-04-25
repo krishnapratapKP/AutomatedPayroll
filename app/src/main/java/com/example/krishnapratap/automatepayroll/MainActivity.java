@@ -3,12 +3,19 @@ package com.example.krishnapratap.automatepayroll;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,19 +25,21 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText userText, passText;
-    Button mLogin;
-    SharedPreferences sp;
+    private EditText userText, passText;
+    private Button mLogin;
+    private Switch aSwitch;
+    private String registration = "emp_registration";
+    private Boolean switchState;
+    private SharedPreferences sp;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +47,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         requestPermission();
-        userText = (EditText) findViewById(R.id.username);
-        passText = (EditText) findViewById(R.id.password);
-        mLogin = (Button) findViewById(R.id.bLogin);
+        sp = getSharedPreferences("User_info", MODE_PRIVATE);
+
+        aSwitch = findViewById(R.id.switch1);
+
+        aSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                editor = sp.edit();
+                editor.putBoolean("switch", isChecked);
+                if (isChecked) {
+                    editor.putString("switchName", "Admin");
+                } else {
+                    editor.putString("switchName", "Employee");
+                }
+                aSwitch.setText(sp.getString("switchName", "N/A"));
+                switchState = sp.getBoolean("switch", false);
+                editor.apply();
+            }
+        });
+
+
+
+        userText = findViewById(R.id.username);
+        passText = findViewById(R.id.password);
+        mLogin = findViewById(R.id.bLogin);
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,25 +80,55 @@ public class MainActivity extends AppCompatActivity {
                 String user = userText.getText().toString();
                 String pass = passText.getText().toString();
                 String type = "login";
+                getRegistration();
                 Background background = new Background();
                 background.execute(type, user, pass);
             }
         });
     }
 
+    @Override
+    protected void onStart() {
+        aSwitch.setText(sp.getString("switchName", "N/A"));
+        switchState = sp.getBoolean("switch", false);
+        aSwitch.setChecked(switchState);
+        super.onStart();
+    }
 
-     public class Background extends AsyncTask<String, Void, String[]> {
+    private void getRegistration() {
 
+        if (switchState) {
+            registration = "registration";
+
+        } else {
+            registration = "emp_registration";
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this, new String[]{ACCESS_COARSE_LOCATION}, 1);
+    }
+
+    private class Background extends AsyncTask<String, Void, String> {
+
+        StringBuilder stringBuilder = new StringBuilder();
         private String mUsername;
         private String mId;
-        ArrayList<String> stringJoiner = new ArrayList<>();
 
         @Override
-        protected String[] doInBackground(String... strings) {
+        protected String doInBackground(String... strings) {
 
             String type = strings[0];
             mUsername = strings[1];
-            String login_url = "http://192.168.43.242/login.php";
 
             if (type.equals("login")) {
 
@@ -75,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
                     String username = strings[1];
                     String password = strings[2];
 
-                    URL url = new URL(login_url);
+                    URL url = new URL(ConstantValue.LOGIN_URL);
                     HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                     httpURLConnection.setRequestMethod("POST");
                     httpURLConnection.setDoOutput(true);
                     httpURLConnection.setDoInput(true);
                     OutputStream outputStream = httpURLConnection.getOutputStream();
                     BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-                    String post_data = URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode(username, "UTF-8") + "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8") + "&" + type;
+                    String post_data = URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode(username, "UTF-8") + "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(password, "UTF-8") + "&" + URLEncoder.encode("registration", "UTF-8") + "=" + URLEncoder.encode(registration, "UTF-8") + "&" + type;
                     bufferedWriter.write(post_data);
                     bufferedWriter.flush();
                     bufferedWriter.close();
@@ -92,22 +154,18 @@ public class MainActivity extends AppCompatActivity {
                     String line;
 
                     while ((line = bufferedReader.readLine()) != null) {
-                        stringJoiner.add(line);
+                        stringBuilder.append(line.trim());
                     }
-                    String[] sSplit = stringJoiner.toString().split("<br>");
-                    sSplit[0] = sSplit[0].replace("[", "");
-                    sSplit[sSplit.length - 1] = sSplit[sSplit.length - 1].replace("]", "");
+
                     bufferedReader.close();
                     inputStream.close();
                     httpURLConnection.disconnect();
 
-                    return sSplit;
+                    return stringBuilder.toString();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-
-
             return null;
         }
 
@@ -117,41 +175,45 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(String[] s) {
-
-            mId = s[0];
+        protected void onPostExecute(String s) {
 
 
-            if (s[s.length - 1].equals("login_success")) {
-                SharedPreferences sp = getSharedPreferences("User_info", MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("username", mUsername);
-                editor.putString("Id", mId);
-                editor.apply();
+            if (!(s.equals("notsuccess"))) {
 
+                try {
+                    JSONArray jsonArray = new JSONArray(s);
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                    SharedPreferences sp = getSharedPreferences("User_info", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    String username = jsonObject.getString("Username");
+                    String Id = jsonObject.getString("Id");
 
-                Intent intent = new Intent(MainActivity.this, LoginPage.class);
+                    if (switchState) {
 
-                startActivity(intent);
+                        String Email = jsonObject.getString("Email");
+                        String Image = jsonObject.getString("Image");
+                        editor.putString("username", username);
+                        editor.putString("Id", Id);
+                        editor.putString("Email", Email);
+                        editor.putString("Image", Image);
+                        editor.apply();
+                        Intent intent = new Intent(MainActivity.this, AdminHr.class);
+                        startActivity(intent);
+                    } else {
+                        editor.putString("username", username);
+                        editor.putString("Id", Id);
+
+                        editor.apply();
+                        Intent intent = new Intent(MainActivity.this, LoginPage.class);
+                        startActivity(intent);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                android.widget.Toast.makeText(MainActivity.this, "Check Your Username and Password", Toast.LENGTH_LONG).show();
             }
         }
     }
-
-
-    @Override
-    public void onBackPressed() {
-
-
-        Intent startMain = new Intent(Intent.ACTION_MAIN);
-        startMain.addCategory(Intent.CATEGORY_HOME);
-        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(startMain);
-
-    }
-
-    private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this, new String[]{ACCESS_COARSE_LOCATION}, 1);
-    }
-
 }

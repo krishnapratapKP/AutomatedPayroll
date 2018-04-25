@@ -5,4 +5,46 @@
     <string name="login">Login</string>
     <string name="longitude">Longitude</string>
     <string name="latitude">Latitude</string>
+
+
+
+    <array name="arrays">
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+    </array>
+    <string name="close">Close</string>
+    <string name="open">Open</string>
+
+
+    <string name="home">Home</string>
+    <string name="checksalary">Check Salary</string>
+    <string name="checkemployee">Check Employee</string>
+    <string name="viewimage">View Image</string>
+    <string name="changepassword">Change Password</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="jumbotron">From this website platform, You can monitoring of employee\'s field work and also generate the automating payroll receipt of employees.</string>
+    <string name="logout">Logout</string>
+    <string name="checkpassword">Check Password</string>
+    <string name="fromdate">From Date</string>
+    <string name="FromDateSelect">Select</string>
+    <string name="search">Search</string>
+    <string name="perdayRupees">Rupees Per Day</string>
+    <string name="days">Date</string>
+    <string name="EmpId">EmpId</string>
+    <string name="clear">Clear</string>
+    <string name="salary">Salary</string>
+    <string name="date">Date</string>
+    <string name="employeeImage">Employee Image</string>
+    <string name="chooseOptions">Choose Option</string>
+    <string name="FromDate">From Date</string>
+    <string name="ToDate">To Date</string>
+    <string name="Day">day</string>
+    <string name="Salary">Salary</string>
+    <string name="Id">EmpId</string>
+    <string name="dateFormat">%02d-%02d-%d</string>
+    <string name="dateL">yyyy-MM-dd</string>
+    <string name="timeL">HH:mm:ss</string>
 </resources>

@@ -1,68 +1,64 @@
 package com.example.krishnapratap.automatepayroll;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
 import java.util.Date;
+import java.util.Locale;
 
 
-public class LoginPage extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class LoginPage extends AppCompatActivity {
 
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    SharedPreferences sp;
     private TextView mLongitude;
     private TextView mLatitude;
-    private GoogleApiClient mGoogleApiClient;
 
     private LocationRequest mLocationRequest;
-
-
     private long mInterval;
-
-    private long mTakePicture;
-    private Location mLocation;
-    private static final long lTakePicture = 360000;
-
-    private long rTakePicture = 0;
-
     private String msLongitude;
     private String msLatitude;
-
     private String mCurrentPhotoPath;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView mImageView;
     private TextView mUsername;
     private String sUsername;
     private String mId;
-    private String mDateTime;
-    SharedPreferences sp;
-    int rImage = 0;
+    private Toolbar mToolbar;
+
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private static final int MY_PERMISSION_REQUEST_FINE_LOCATION = 101;
+    private LocationCallback mLocationCallback;
 
 
     @Override
@@ -70,63 +66,92 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
 
+        mToolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
-        mImageView = (ImageView) findViewById(R.id.uImageView);
-        mUsername = (TextView) findViewById(R.id.tUsername);
+        mImageView = findViewById(R.id.uImageView);
+        mUsername = findViewById(R.id.tUsername);
+
+        dispatchTakePictureIntent();
+
+        mInterval = 1000 * 60;
+
+        getLocationRequest();
+
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        getLocation(location);
+                    } else {
+                        Toast.makeText(LoginPage.this, "Location is not available", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        } else {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_REQUEST_FINE_LOCATION);
+        }
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                for (Location location : locationResult.getLocations()) {
+                    if (location != null) {
+                        getLocation(location);
+                        String mLocation = "location";
+                        String date = new SimpleDateFormat(getString(R.string.dateL), Locale.US).format(new Date());
 
 
-        dispatchTakePicturInten();
+                        Background background = new Background();
+                        background.execute(mLocation, mId, msLongitude, msLatitude, date);
 
-
-
-
-        mInterval = 1000 * 60 * 3;
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+                    }
+                }
+            }
+        };
+        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
 
         sp = getSharedPreferences("User_info", MODE_PRIVATE);
         sUsername = sp.getString("username", "N/A");
         mId = sp.getString("Id", "N/A");
 
         mUsername.setText(sUsername);
-        mLatitude = (TextView) findViewById(R.id.latitude);
-        mLongitude = (TextView) findViewById(R.id.longitude);
+        mLatitude = findViewById(R.id.latitude);
+        mLongitude = findViewById(R.id.longitude);
     }
 
-    @NonNull
-    private Date getsTime() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
-        return new Date();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-
-    }
-
-    @Override
-    protected void onStop() {
-        mGoogleApiClient.disconnect();
-        super.onStop();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-
-        mLocationRequest = LocationRequest.create();
+    private void getLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(180000);
+        mLocationRequest.setFastestInterval(3000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setFastestInterval(mInterval);
+    }
 
-        if (ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+    public void getLocation(Location location) {
+        mLatitude.setText(String.valueOf(location.getLatitude()));
+        mLongitude.setText(String.valueOf(location.getLongitude()));
+        msLatitude = String.valueOf(location.getLatitude());
+        msLongitude = String.valueOf(location.getLongitude());
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+
+        switch (requestCode) {
+            case MY_PERMISSION_REQUEST_FINE_LOCATION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //
+                } else {
+                    Toast.makeText(getApplicationContext(), "This app requires location permission to be gran", Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-
     }
 
     private void fileSize() {
@@ -139,47 +164,7 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
         }
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-        getLocation(location);
-        mLocation = location;
-        String mLocation = "location";
-        Date date = getsTime();
-        mTakePicture = date.getTime();
-        rTakePicture = date.getTime() - mTakePicture;
-
-
-        Log.v("Ch", mTakePicture + "    mT   " + rTakePicture + "    rT   ");
-        Background background = new Background();
-        background.execute(mLocation, mId, msLongitude, msLatitude);
-
-
-    }
-
-    private void getLocation(Location location) {
-        msLatitude = String.valueOf(location.getLatitude());
-        msLongitude = String.valueOf(location.getLongitude());
-        mLatitude.setText(msLatitude);
-        mLongitude.setText(msLongitude);
-    }
-
-    private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this, new String[]{ACCESS_COARSE_LOCATION}, 1);
-    }
-
-    private void dispatchTakePicturInten() {
+    private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -198,8 +183,7 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
     }
 
     private File createImageFile() throws IOException {
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        mDateTime = timestamp;
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timestamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
@@ -212,14 +196,30 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        fileSize();
 
-        String timestamp = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(new Date());
-        Background background = new Background();
-        background.execute("Image", mId, mCurrentPhotoPath, timestamp, msLatitude, msLongitude);
-        mImageView.setImageDrawable(Drawable.createFromPath(mCurrentPhotoPath));
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_OK) {
+                Bitmap bitmap;
+                BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
+                bitmapFactory.inSampleSize = 4;
+                bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
+
+                rotateImage(bitmap);
+
+                String date = new SimpleDateFormat(getString(R.string.dateL), Locale.US).format(new Date());
+                String time = new SimpleDateFormat(getString(R.string.timeL), Locale.US).format(new Date());
+                Background background = new Background();
+                background.execute("Image", mId, mCurrentPhotoPath, date, time, msLatitude, msLongitude);
+
+            } else {
+                fileSize();
+            }
+        }
+
 
     }
+
+
 
 
     @Override
@@ -233,26 +233,57 @@ public class LoginPage extends AppCompatActivity implements GoogleApiClient.Conn
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
-    public void getPictureLocation() {
-        getLocation(mLocation);
-        dispatchTakePicturInten();
-
+        getMenuInflater().inflate(R.menu.log_menu, menu);
+        return true;
     }
 
-    public void logout(View view) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-        SharedPreferences.Editor editor = sp.edit();
+        int id = item.getItemId();
 
-        editor.clear();
-        editor.putInt("reference", 1);
-        editor.apply();
-        getPictureLocation();
-        Intent intent=new Intent(LoginPage.this,MainActivity.class);
-        startActivity(intent);
-        LoginPage.this.finish();
+        if (id == R.id.nav_logout) {
+            mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+            Intent intent = new Intent(LoginPage.this, MainActivity.class);
+            startActivity(intent);
+            return true;
 
-
-
+        }
+        return super.onOptionsItemSelected(item);
     }
+
+    private void rotateImage(Bitmap bitmap) {
+
+        ExifInterface exifInterface = null;
+        try {
+            exifInterface = new ExifInterface(mCurrentPhotoPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert exifInterface != null;
+        int orientation = exifInterface.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.setRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.setRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix.setRotate(270);
+                break;
+
+            default:
+
+        }
+
+        Bitmap rotateBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        mImageView.setImageBitmap(rotateBitmap);
+    }
+
+
 }

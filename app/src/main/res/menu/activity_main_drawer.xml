@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:showIn="navigation_view">
+
+    <item
+        android:id="@+id/nav_home"
+
+        android:title="@string/home" />
+    <item
+        android:id="@+id/nav_checksalary"
+
+        android:title="@string/checksalary" />
+    <item
+        android:id="@+id/nav_checkemployee"
+
+        android:title="@string/checkemployee" />
+    <item
+        android:id="@+id/nav_viewimage"
+
+        android:title="@string/viewimage" />
+    <item
+        android:id="@+id/nav_changepassword"
+
+        android:title="@string/changepassword" />
+
+</menu>
