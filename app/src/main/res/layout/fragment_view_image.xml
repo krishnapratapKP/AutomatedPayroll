@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-    android:background="@android:color/black"
+    android:background="@drawable/backgroundw"
     tools:context=".ViewImage">
 
 
@@ -27,6 +27,8 @@
         android:layout_marginStart="5dp"
         android:layout_marginTop="50dp"
         android:text="@string/FromDateSelect"
+        android:background="@drawable/buttonshape"
+
         app:layout_constraintBottom_toBottomOf="@id/viewImage_date"
         app:layout_constraintLeft_toRightOf="@id/viewImage_date"
         app:layout_constraintTop_toTopOf="parent" />
@@ -44,10 +46,12 @@
 
     <Button
         android:id="@+id/searchImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/buttonWidth"
+        android:layout_height="@dimen/buttonHeight"
         android:layout_marginTop="15dp"
         android:text="@string/search"
+        android:background="@drawable/buttonshape"
+
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/empIdView" />

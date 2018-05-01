@@ -32,7 +32,7 @@
     <string name="FromDateSelect">Select</string>
     <string name="search">Search</string>
     <string name="perdayRupees">Rupees Per Day</string>
-    <string name="days">Date</string>
+    <string name="days">Day</string>
     <string name="EmpId">EmpId</string>
     <string name="clear">Clear</string>
     <string name="salary">Salary</string>
@@ -47,4 +47,7 @@
     <string name="dateFormat">%02d-%02d-%d</string>
     <string name="dateL">yyyy-MM-dd</string>
     <string name="timeL">HH:mm:ss</string>
+    <string name="name">Name</string>
+    <string name="mobile">Mobile</string>
+    <string name="email">Email</string>
 </resources>

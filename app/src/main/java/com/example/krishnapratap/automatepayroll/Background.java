@@ -102,7 +102,7 @@ public class Background extends AsyncTask<String, Void, String> {
         if (type.equals("checkPassword")) {
             String empId = strings[1];
             String oldPass = strings[2];
-            String result = getPasswordValidity(empId, oldPass, ConstantValue.CHECK_EMPLOYEE_URL);
+            String result = getPasswordValidity(empId, oldPass, ConstantValue.CHANGE_PASSWORD_URL);
             if (result != null) return result;
         }
 

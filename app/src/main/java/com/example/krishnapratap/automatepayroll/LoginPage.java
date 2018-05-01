@@ -16,6 +16,8 @@ import android.support.annotation.NonNull;
 import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -42,8 +44,10 @@ public class LoginPage extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     SharedPreferences sp;
+    private  SharedPreferences.Editor editor;
     private TextView mLongitude;
     private TextView mLatitude;
+    private String logout="logout";
 
     private LocationRequest mLocationRequest;
     private long mInterval;
@@ -164,7 +168,7 @@ public class LoginPage extends AppCompatActivity {
         }
     }
 
-    private void dispatchTakePictureIntent() {
+    public void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -209,7 +213,19 @@ public class LoginPage extends AppCompatActivity {
                 String date = new SimpleDateFormat(getString(R.string.dateL), Locale.US).format(new Date());
                 String time = new SimpleDateFormat(getString(R.string.timeL), Locale.US).format(new Date());
                 Background background = new Background();
+                if(!(msLatitude==null&&msLongitude==null))
                 background.execute("Image", mId, mCurrentPhotoPath, date, time, msLatitude, msLongitude);
+
+                if(logout.equals(sp.getString("image","login")))
+                {
+
+                    editor = sp.edit();
+                    editor.remove("image");
+                    editor.apply();
+
+                    Intent intent=new Intent(LoginPage.this,MainActivity.class);
+                    startActivity(intent);
+                }
 
             } else {
                 fileSize();
@@ -247,8 +263,12 @@ public class LoginPage extends AppCompatActivity {
 
         if (id == R.id.nav_logout) {
             mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-            Intent intent = new Intent(LoginPage.this, MainActivity.class);
-            startActivity(intent);
+            editor=sp.edit();
+            editor.putString("image","logout");
+            editor.apply();
+            dispatchTakePictureIntent();
+           /* Intent intent = new Intent(LoginPage.this, MainActivity.class);
+            startActivity(intent);*/
             return true;
 
         }
@@ -282,7 +302,9 @@ public class LoginPage extends AppCompatActivity {
         }
 
         Bitmap rotateBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-        mImageView.setImageBitmap(rotateBitmap);
+        RoundedBitmapDrawable roundedBitmapDrawable= RoundedBitmapDrawableFactory.create(getResources(),rotateBitmap);
+        roundedBitmapDrawable.setCircular(true);
+        mImageView.setImageDrawable(roundedBitmapDrawable);
     }
 
 

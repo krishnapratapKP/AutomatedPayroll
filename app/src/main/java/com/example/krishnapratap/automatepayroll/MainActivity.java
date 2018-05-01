@@ -1,9 +1,11 @@
 package com.example.krishnapratap.automatepayroll;
 
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -12,6 +14,18 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
+
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,7 +45,7 @@ import java.net.URLEncoder;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnFailureListener {
 
     private EditText userText, passText;
     private Button mLogin;
@@ -40,6 +54,17 @@ public class MainActivity extends AppCompatActivity {
     private Boolean switchState;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
+    private LocationSettingsRequest settingsRequest;
+    private SettingsClient client;
+    private Task<LocationSettingsResponse> task;
+    private LocationRequest mLocationRequest;
+    private static final int REQUEST_CHECK_SETTING = 101;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +72,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         requestPermission();
+
+
+        mLocationRequest=new LocationRequest();
+        settingsRequest=new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest).build();
+
+        client= LocationServices.getSettingsClient(this);
+
+        task=client.checkLocationSettings(settingsRequest);
+
+        task.addOnFailureListener(this);
         sp = getSharedPreferences("User_info", MODE_PRIVATE);
 
         aSwitch = findViewById(R.id.switch1);
@@ -70,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
         userText = findViewById(R.id.username);
         passText = findViewById(R.id.password);
         mLogin = findViewById(R.id.bLogin);
@@ -85,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
                 background.execute(type, user, pass);
             }
         });
+
+
     }
 
     @Override
@@ -92,8 +130,11 @@ public class MainActivity extends AppCompatActivity {
         aSwitch.setText(sp.getString("switchName", "N/A"));
         switchState = sp.getBoolean("switch", false);
         aSwitch.setChecked(switchState);
+
         super.onStart();
     }
+
+
 
     private void getRegistration() {
 
@@ -117,6 +158,53 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{ACCESS_FINE_LOCATION}, 1);
         ActivityCompat.requestPermissions(this, new String[]{ACCESS_COARSE_LOCATION}, 1);
     }
+
+
+
+    @Override
+    public void onFailure(@NonNull Exception e) {
+        int statusCode=((ApiException)e).getStatusCode();
+        if(statusCode==LocationSettingsStatusCodes.RESOLUTION_REQUIRED)
+        {
+            // Locationg setting are not satisfied
+
+            try
+            {
+                // show the dialog by calling
+                ResolvableApiException resolvableApiException=(ResolvableApiException)e;
+                resolvableApiException.startResolutionForResult(MainActivity.this,REQUEST_CHECK_SETTING);
+
+            }
+            catch (IntentSender.SendIntentException sendEx)
+            {
+                // Ignore the error
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode==REQUEST_CHECK_SETTING)
+        {
+            if(resultCode==RESULT_CANCELED){
+                //stopTrackingLocatoin();
+            }
+            else  if(resultCode==RESULT_OK)
+            {
+                //startTrackingLocation();
+                mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+
+
+
+
 
     private class Background extends AsyncTask<String, Void, String> {
 

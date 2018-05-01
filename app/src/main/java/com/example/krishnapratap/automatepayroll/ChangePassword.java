@@ -20,7 +20,7 @@ public class ChangePassword extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_change_password, container, false);
-
+         getActivity().setTitle(R.string.changepassword);
         empIdPass = view.findViewById(R.id.empIdPassword);
         empOldPass = view.findViewById(R.id.oldpass);
         empNewPass = view.findViewById(R.id.newpass);

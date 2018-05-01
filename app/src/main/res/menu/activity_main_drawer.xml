@@ -7,23 +7,23 @@
 
     <item
         android:id="@+id/nav_home"
-
+        android:icon="@drawable/home_icon"
         android:title="@string/home" />
     <item
         android:id="@+id/nav_checksalary"
-
+        android:icon="@drawable/salary_icon"
         android:title="@string/checksalary" />
     <item
         android:id="@+id/nav_checkemployee"
-
+        android:icon="@drawable/person_icon"
         android:title="@string/checkemployee" />
     <item
         android:id="@+id/nav_viewimage"
-
+        android:icon="@drawable/image_icon"
         android:title="@string/viewimage" />
     <item
         android:id="@+id/nav_changepassword"
-
+        android:icon="@drawable/password_icon"
         android:title="@string/changepassword" />
 
 </menu>
