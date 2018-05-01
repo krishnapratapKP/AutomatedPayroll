@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -80,7 +78,6 @@ public class AdminHr extends AppCompatActivity implements NavigationView.OnNavig
         switch (id) {
             case R.id.nav_home:
                 fragment = new Home();
-
                 break;
             case R.id.nav_checksalary:
                 fragment = new CheckSalary();
@@ -93,7 +90,6 @@ public class AdminHr extends AppCompatActivity implements NavigationView.OnNavig
                 break;
             case R.id.nav_changepassword:
                 fragment = new ChangePassword();
-
                 break;
         }
 
@@ -164,11 +160,9 @@ public class AdminHr extends AppCompatActivity implements NavigationView.OnNavig
 
             try {
                 BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
-                bitmapFactory.inSampleSize = 9;
+                bitmapFactory.inSampleSize = 8;
                 InputStream inputStream = new URL(imageUrl).openStream();
                 bitmap = BitmapFactory.decodeStream(inputStream, null, bitmapFactory);
-
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -180,9 +174,7 @@ public class AdminHr extends AppCompatActivity implements NavigationView.OnNavig
         protected void onPostExecute(Bitmap bitmap) {
 
 
-            RoundedBitmapDrawable roundedBitmapDrawable=RoundedBitmapDrawableFactory.create(getResources(),bitmap);
-            roundedBitmapDrawable.setCircular(true);
-            mImageView.setImageDrawable(roundedBitmapDrawable);
+            mImageView.setImageBitmap(bitmap);
         }
 
 
