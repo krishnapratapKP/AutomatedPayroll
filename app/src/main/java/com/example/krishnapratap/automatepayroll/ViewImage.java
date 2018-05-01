@@ -40,7 +40,7 @@ public class ViewImage extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
+        getActivity().setTitle(R.string.viewimage);
         View view = inflater.inflate(R.layout.fragment_view_image, container, false);
 
         mImageView = view.findViewById(R.id.viewImage);
@@ -75,8 +75,8 @@ public class ViewImage extends Fragment implements View.OnClickListener {
             datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-
-                    ImageDate.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
+                    String date = String.format(getString(R.string.dateFormat), year, month + 1, dayOfMonth);
+                    ImageDate.setText(date);
                 }
             }, mYear, mMonth, mDay);
 
@@ -91,8 +91,6 @@ public class ViewImage extends Fragment implements View.OnClickListener {
 
             Background background = new Background();
             background.execute("viewImage", empId, empImageDate);
-            // DownloadImage downloadImage=new DownloadImage();
-            // downloadImage.execute();
         }
 
     }
@@ -110,7 +108,7 @@ public class ViewImage extends Fragment implements View.OnClickListener {
 
             try {
                 BitmapFactory.Options bitmapFactory = new BitmapFactory.Options();
-                bitmapFactory.inSampleSize = 8;
+                bitmapFactory.inSampleSize = 4;
                 InputStream inputStream = new URL(imageUrl).openStream();
                 bitmap = BitmapFactory.decodeStream(inputStream, null, bitmapFactory);
 

@@ -16,7 +16,7 @@ public class CheckEmployee extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_check_employee, container, false);
 
-
+        getActivity().setTitle(R.string.checkemployee);
         Background background = new Background(view, getContext());
         background.execute("checkEmployee");
 

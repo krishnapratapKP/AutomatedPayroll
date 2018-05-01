@@ -2,7 +2,9 @@ package com.example.krishnapratap.automatepayroll;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -28,6 +30,9 @@ public class CheckSalary extends Fragment implements View.OnClickListener {
     private int mYear, mMonth, mDay;
     private DatePickerDialog datePickerDialog;
     private View view;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+
 
     @Nullable
     @Override
@@ -36,9 +41,36 @@ public class CheckSalary extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        editor=sharedPreferences.edit();
+        editor.putString("fDate",fromDate.getText().toString());
+        editor.putString("tDate",toDate.getText().toString());
+        editor.putString("dayValue",dayValue.getText().toString());
+        editor.putString("empIdValue",empIdValue.getText().toString());
+        editor.putString("salaryValue",salaryValue.getText().toString());
+        editor.apply();
+
+
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        fromDate.setText(sharedPreferences.getString("fDate","From Date"));
+        toDate.setText(sharedPreferences.getString("tDate","To Date"));
+        dayValue.setText(sharedPreferences.getString("dayValue","Number of Days"));
+        empIdValue.setText(sharedPreferences.getString("empIdValue","Employee Id"));
+        salaryValue.setText(sharedPreferences.getString("salaryValue","Salary Value"));
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        getActivity().setTitle(R.string.checksalary);
+        sharedPreferences=getContext().getSharedPreferences("info",Context.MODE_PRIVATE);
 
         view = inflater.inflate(R.layout.fragment_check_salary, container, false);
         fromDate = view.findViewById(R.id.fromdate);
@@ -132,5 +164,16 @@ public class CheckSalary extends Fragment implements View.OnClickListener {
         }
     }
 
+    @Override
+    public void onDestroy() {
 
+        editor=sharedPreferences.edit();
+        editor.remove("fDate");
+        editor.remove("tDate");
+        editor.remove("dayValue");
+        editor.remove("empIdValue");
+        editor.remove("salaryValue");
+        editor.apply();
+        super.onDestroy();
+    }
 }

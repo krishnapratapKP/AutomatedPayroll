@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/id"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/EmpId"
+        android:textSize="25sp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/infoId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:hint="ABC"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toRightOf="@id/id"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/empName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/name"
+        android:textSize="25sp"
+        app:layout_constraintTop_toBottomOf="@id/id" />
+
+    <TextView
+        android:id="@+id/infoName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:hint="ABC"
+        android:textSize="25sp"
+        app:layout_constraintLeft_toRightOf="@id/empName"
+        app:layout_constraintTop_toBottomOf="@id/infoId" />
+
+    <TextView
+        android:id="@+id/empMobile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/mobile"
+        android:textSize="25sp"
+        app:layout_constraintTop_toBottomOf="@id/empName" />
+
+    <TextView
+        android:id="@+id/infoMobile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+
+        android:hint="ABC"
+        android:textSize="25sp"
+        app:layout_constraintLeft_toRightOf="@id/empMobile"
+        app:layout_constraintTop_toBottomOf="@id/infoName" />
+
+
+    <TextView
+        android:id="@+id/empEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="@string/email"
+        android:textSize="25sp"
+        app:layout_constraintTop_toBottomOf="@id/empMobile" />
+
+    <TextView
+        android:id="@+id/infoEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:hint="ABC"
+        android:textSize="25sp"
+        app:layout_constraintLeft_toRightOf="@id/empEmail"
+        app:layout_constraintTop_toBottomOf="@id/infoMobile" />
+
+</android.support.constraint.ConstraintLayout>

@@ -47,7 +47,7 @@ public class EmployeeInformationAdapter extends ArrayAdapter<EmployeeInformation
 
 
         TextView employeeId = employeeInfo.findViewById(R.id.infoId);
-        employeeId.setText("" + currentEmployeeInfo.getmEmployeeId());
+        employeeId.setText(String.valueOf(currentEmployeeInfo.getmEmployeeId()));
 
         TextView employeeName = employeeInfo.findViewById(R.id.infoName);
         employeeName.setText(currentEmployeeInfo.getmEmployeeName());
@@ -56,7 +56,7 @@ public class EmployeeInformationAdapter extends ArrayAdapter<EmployeeInformation
         employeeEmail.setText(currentEmployeeInfo.getmEmployeeEmail());
 
         TextView employeeMobile = employeeInfo.findViewById(R.id.infoMobile);
-        employeeMobile.setText("" + currentEmployeeInfo.getmEmployeeMobile());
+        employeeMobile.setText(String.valueOf(currentEmployeeInfo.getmEmployeeMobile()));
 
 
         return employeeInfo;

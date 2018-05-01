@@ -46,7 +46,7 @@
 
         <activity
             android:name=".AdminHr"
-            android:configChanges="orientation|screenSize" />
+             />
     </application>
 
 </manifest>
